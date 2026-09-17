@@ -1,0 +1,201 @@
+# PyLedger Changelog
+
+## Version 2.1.0 (2026-09-17)
+
+### Fixed (test-suite alignment, 17 failures -> 0)
+- CLI entry point typo `pyliger` (kept as alias, added `pyledger`)
+- `validate_currency` returns bool; added `validate_currency_strict`
+- `Account.get_balance_as_of`, `get_transactions(txn_type=...)`
+- `Ledger.trial_balance()` (Decimal totals) + cached `get_trial_balance()`
+- `Invoice.apply_tax/record_payment`, fixed inverted `issue()`
+- `Payment(party)` inference + `COMPLETED` status + `PaymentReceiver(id)`
+- `InventoryItem.weighted_average_cost()` method API
+- Reports compat keys (`items`, `total_assets`), `BusinessEngine(company=...)`
+
+### Added (enterprise readiness)
+- `SequenceService` UUID-based numbering (`core/sequences.py`)
+- `CashAccount` / `GLAccount`, `normal_balance`, `apply_debit/credit`
+- `JournalEntry` double-post guard (`AlreadyPostedError`) + `reverse()`
+- `Money.quantize/allocate`, `FXProvider` abstraction
+- SQLAlchemy persistence: `database/orm.py` + `SqlAlchemyLedgerStore` + UoW + sequences
+- Multi-tenancy: `Ledger(company_id)`, `JournalEntry(company_id, cost_center)`, `query_entries`, `bulk_record`
+- Security: PBKDF2 passwords, `PersistentAuditTrail` (JSONL), PII masking
+- Events: `events.EventBus` + `ENTRY_POSTED` emission; `api.create_app()` (FastAPI, optional)
+- Benchmarks: `benchmarks/bench.py`
+
+### ⚖️ License change
+- Relicensed from MIT to **Apache License 2.0** (commercial-friendly + patent grant)
+- Added `NOTICE` attribution file: distributors must retain the PyLedger credit line
+
+## Version 1.0.0 (2026-03-14)
+
+### Initial Release
+
+#### ✨ Features
+
+**Core Accounting**
+- Account management with multiple account types
+- Journal entry recording with automatic balancing
+- General ledger management
+- Trial balance reporting
+- Multi-account transfers
+
+**Invoicing & Payments**
+- Invoice creation and management
+- Line item tracking
+- Payment recording and status tracking
+- Payment receiver for managing collections
+- Multiple payment methods support
+
+**Tax Management**
+- Tax calculation and tracking
+- VAT/GST support
+- Multiple tax rates
+- Reverse tax calculation
+- Tax calculator for multiple taxes
+
+**Financial Reporting**
+- Balance Sheet generation
+- Income Statement (P&L) generation
+- Cash Flow Statement generation
+- Trial balance reports
+
+**Multi-Currency Support**
+- Support for multiple currencies (USD, EUR, GBP, SAR, AED, EGP, JOD, KWD)
+- Currency conversion
+- Money class for currency arithmetic
+- Exchange rate management
+
+**Validation & Error Handling**
+- Comprehensive input validation
+- Custom exceptions for accounting operations
+- Account code validation
+- Amount validation
+- Currency validation
+- Tax rate validation
+
+**Database Support**
+- SQLite integration
+- In-memory repository implementation
+- Extensible repository pattern
+- Database connection pooling ready
+- Support for PostgreSQL and MySQL (future versions)
+
+**Utilities**
+- Data formatting utilities
+- Account code validation
+- Amount formatting
+- Currency symbol support
+- Transaction history tracking
+
+#### 🏗️ Project Structure
+
+```
+pyledger/
+├── core/               # Core accounting components
+│   ├── account.py     # Account management
+│   ├── journal.py     # Journal entries
+│   ├── ledger.py      # General ledger
+│   └── transaction.py # Transactions
+├── accounting/         # Accounting operations
+│   ├── invoice.py     # Invoice management
+│   ├── payment.py     # Payment processing
+│   └── tax.py         # Tax calculations
+├── reports/           # Financial reports
+│   ├── balance_sheet.py  # Balance sheet & income statement
+│   └── cash_flow.py      # Cash flow statement
+├── database/          # Database layer
+│   ├── models.py      # Data models
+│   └── repository.py  # Repository pattern
+├── utils/             # Utility functions
+│   ├── validators.py  # Validation functions
+│   ├── currency.py    # Currency management
+│   └── formatter.py   # Formatting utilities
+└── exceptions/        # Custom exceptions
+    └── errors.py      # Exception definitions
+```
+
+#### 📚 Documentation
+
+- Comprehensive README with usage examples
+- Detailed API documentation
+- Multiple code examples
+- Installation instructions
+- Configuration guide
+
+#### 🧪 Testing
+
+- Comprehensive test suite with pytest
+- Unit tests for all major components
+- Example test cases
+
+#### 🔒 Validation
+
+- Account code format validation
+- Account type validation
+- Amount validation
+- Currency validation
+- Tax rate validation
+- Date validation
+
+#### ⚠️ Custom Exceptions
+
+- `PyLedgerException` - Base exception
+- `AccountNotFoundError` - Account not found
+- `UnbalancedEntryError` - Journal entry not balanced
+- `InvalidAccountTypeError` - Invalid account type
+- `InsufficientBalanceError` - Insufficient balance
+- `DuplicateAccountError` - Duplicate account code
+- `InvalidCurrencyError` - Invalid currency
+- `InvalidTaxRateError` - Invalid tax rate
+- `InvoiceNotFoundError` - Invoice not found
+- `InvalidInvoiceStatusError` - Invalid invoice status
+
+### ✅ What's Included
+
+✓ Complete accounting system
+✓ Invoice management
+✓ Multi-currency support
+✓ Tax calculations
+✓ Financial reports
+✓ Database integration ready
+✓ Comprehensive error handling
+✓ Data validation
+✓ Transaction tracking
+✓ Payment management
+✓ Formatting utilities
+✓ Currency conversion
+
+### 📝 Notes
+
+- This is a professional-grade accounting library suitable for:
+  - Accounting software development
+  - ERP systems
+  - Invoice management systems
+  - Expense tracking systems
+  - Financial analysis tools
+
+### 🚀 Future Roadmap
+
+- ORM integration (SQLAlchemy)
+- REST API integration (FastAPI/Django)
+- Advanced financial ratios
+- Budget management
+- Audit trails
+- Multi-company support
+- Bank reconciliation
+- Cost centers
+- Profit centers
+- Advanced reporting
+- PDF invoice generation
+- Email integration
+- Webhook support
+
+### 📄 License
+
+MIT License - See LICENSE file for details
+
+---
+
+**Version 1.0.0** - Initial Release
+**Release Date:** March 14, 2026

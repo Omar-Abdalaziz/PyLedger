@@ -1,0 +1,37 @@
+"""
+PyLedger PDF Module - Arabic Support
+Arabic text reshaping and bidirectional text support
+"""
+
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    _HAS_ARABIC = True
+except ImportError:
+    _HAS_ARABIC = False
+
+
+ARABIC_CHARS = set('ابتثجحخدذرزسشصضطظعغفقكلمنهويىآأإةةپچڤگـ،.؟')
+
+
+def contains_arabic(text: str) -> bool:
+    """Check if text contains Arabic characters"""
+    return any(c in ARABIC_CHARS for c in text)
+
+
+def reshape_arabic(text: str) -> str:
+    """Reshape Arabic text for proper PDF rendering"""
+    if not _HAS_ARABIC or not contains_arabic(text):
+        return text
+    try:
+        reshaped = arabic_reshaper.reshape(text)
+        return get_display(reshaped)
+    except Exception:
+        return text
+
+
+def prepare_text(text: str, force_arabic: bool = False) -> str:
+    """Prepare text for PDF rendering (handle Arabic if needed)"""
+    if force_arabic or contains_arabic(text):
+        return reshape_arabic(text)
+    return text
