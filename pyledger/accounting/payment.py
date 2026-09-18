@@ -9,6 +9,14 @@ from enum import Enum
 from pyledger.utils.validators import format_amount
 
 
+def _strict_payment_amount(amount):
+    from pyledger.security.sanitizer import sanitize_amount
+    try:
+        return sanitize_amount(amount, allow_zero=False, allow_negative=False)
+    except ValueError as e:
+        raise ValueError(f"Invalid payment amount: {e}")
+
+
 class PaymentMethod(Enum):
     """Payment methods"""
     CASH = 'cash'
@@ -66,7 +74,7 @@ class Payment:
         """
         from pyledger.core.sequences import next_payment_reference
         Payment._payment_counter += 1
-        self.amount = format_amount(amount)
+        self.amount = _strict_payment_amount(amount)
 
         known_methods = {m.value for m in PaymentMethod} | {m.name for m in PaymentMethod}
         known_lower = {str(x).lower() for x in known_methods}

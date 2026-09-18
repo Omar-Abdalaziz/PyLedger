@@ -10,8 +10,16 @@ from typing import Optional, Dict, Any
 
 
 def _load_root_config() -> dict:
+    # Security: resolve config.py relative to the PROJECT ROOT (package
+    # parent), never the process CWD — importing CWD code would execute
+    # arbitrary files from wherever the library happens to run.
     try:
-        spec = importlib.util.spec_from_file_location("config", "config.py")
+        from pathlib import Path
+        root_config = Path(__file__).resolve().parent.parent / "config.py"
+        if not root_config.is_file():
+            return {}
+        spec = importlib.util.spec_from_file_location(
+            "pyledger_root_config", str(root_config))
         if spec and spec.loader:
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)

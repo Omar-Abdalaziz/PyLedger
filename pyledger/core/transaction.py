@@ -8,6 +8,15 @@ from datetime import datetime
 from pyledger.utils.validators import format_amount
 
 
+def _strict_amount(amount):
+    # Deferred import (circular): security.__init__ -> validator -> ledger.
+    from pyledger.security.sanitizer import sanitize_amount
+    try:
+        return sanitize_amount(amount, allow_zero=True, allow_negative=False)
+    except ValueError as e:
+        raise ValueError(f"Invalid transaction amount: {e}")
+
+
 class Transaction:
     """
     Represents a transaction (debit or credit to an account)
@@ -40,10 +49,15 @@ class Transaction:
         """
         if transaction_type.lower() not in ['debit', 'credit']:
             raise ValueError("Transaction type must be 'debit' or 'credit'")
-        
+
+        # Security: legs must be non-negative. A negative leg would invert
+        # double-entry economics while staying "balanced". Zero is allowed
+        # (no-op postings, e.g. zero-balance period closes).
+        amount = _strict_amount(amount)
+
         self.account = account
         self.type = transaction_type.lower()
-        self.amount = format_amount(amount)
+        self.amount = amount
         self.date = date or datetime.now()
         self.description = description
         self.posted = False

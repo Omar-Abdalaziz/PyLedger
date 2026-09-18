@@ -27,6 +27,24 @@
 - Relicensed from MIT to **Apache License 2.0** (commercial-friendly + patent grant)
 - Added `NOTICE` attribution file: distributors must retain the PyLedger credit line
 
+### 🛡️ Security hardening (audit 2026-09-18, bandit: 0 medium/high)
+- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
+  `Inventory receive/issue`, `FX update_rate` now reject negative (and non-positive
+  where meaningless) amounts — negative legs could invert books while "balanced"
+- **Tax convention fix (critical):** `sell/buy/expense tax_rate` is now PERCENT
+  library-wide (`15` = 15%); previously `15` computed 1500%. New `normalize_tax_rate()`
+- **CSV injection:** `ReportExporter` neutralizes `= + - @`-leading cells
+- **PDF markup:** `prepare_text` XML-escapes (`R&D <Ltd>` safe)
+- **Passwords:** `verify_password` fail-closed parsing (no `assert`), iteration bounds
+- **Config:** root `config.py` resolved from project root, never CWD (code-exec guard)
+- **Notes:** content/author/entity sanitized on add/edit
+- **API:** strict `debit|credit` sides, required description, narrow 404s, capped
+  idempotency memory, Python 3.7-compatible typing
+- **CLI:** clean errors on corrupt ledgers/periods (no tracebacks), output paths sanitized
+- **DoS bounds:** audit log capped at 10k entries, idempotency keys capped at 10k
+- **Imports:** `pyledger.security` validator exports are lazy (PEP 562) — fixes
+  circular import while keeping `from pyledger.security import EntryValidator` working
+
 ## Version 1.0.0 (2026-03-14)
 
 ### Initial Release

@@ -11,6 +11,21 @@ from pyledger.accounting.tax import Tax
 from pyledger.exceptions.errors import InvalidInvoiceStatusError
 
 
+def _sanitize_amount(*args, **kwargs):
+    from pyledger.security.sanitizer import sanitize_amount
+    return sanitize_amount(*args, **kwargs)
+
+
+def _sanitize_quantity(*args, **kwargs):
+    from pyledger.security.sanitizer import sanitize_quantity
+    return sanitize_quantity(*args, **kwargs)
+
+
+def _sanitize_text(*args, **kwargs):
+    from pyledger.security.sanitizer import sanitize_text
+    return sanitize_text(*args, **kwargs)
+
+
 class InvoiceStatus(Enum):
     """Invoice status"""
     DRAFT = 'draft'
@@ -27,15 +42,25 @@ class InvoiceItem:
     def __init__(self, description: str, quantity: Decimal, unit_price: Decimal):
         """
         Initialize an invoice item
-        
+
         Args:
             description: Item description
-            quantity: Quantity
-            unit_price: Unit price
+            quantity: Quantity (must be > 0)
+            unit_price: Unit price (must be >= 0; 0 = free item)
         """
-        self.description = description
-        self.quantity = Decimal(str(quantity))
-        self.unit_price = format_amount(unit_price)
+        try:
+            quantity = _sanitize_quantity(quantity)
+        except ValueError as e:
+            raise ValueError(f"Invalid item quantity: {e}")
+        if quantity <= 0:
+            raise ValueError(f"Item quantity must be positive, got {quantity}")
+        try:
+            unit_price = _sanitize_amount(unit_price, allow_negative=False)
+        except ValueError as e:
+            raise ValueError(f"Invalid item unit price: {e}")
+        self.description = _sanitize_text(description)
+        self.quantity = quantity
+        self.unit_price = unit_price
     
     def get_total(self) -> Decimal:
         """Get item total (quantity * unit_price)"""
@@ -162,15 +187,18 @@ class Invoice:
     def pay(self, amount, method: str = 'cash') -> bool:
         """
         Record a payment
-        
+
         Args:
-            amount: Payment amount
+            amount: Payment amount (must be > 0)
             method: Payment method (cash, check, transfer, etc.)
-            
+
         Returns:
             True if payment recorded
         """
-        amount = format_amount(amount)
+        try:
+            amount = _sanitize_amount(amount, allow_zero=False, allow_negative=False)
+        except ValueError as e:
+            raise ValueError(f"Invalid payment amount: {e}")
         self.paid_amount = format_amount(self.paid_amount + amount)
         
         remaining = self.get_remaining_balance()

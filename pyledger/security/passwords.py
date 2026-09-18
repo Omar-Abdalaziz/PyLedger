@@ -18,11 +18,21 @@ def hash_password(password: str, salt: bytes = None, iterations: int = 210_000) 
 
 
 def verify_password(password: str, stored: str) -> bool:
+    """Constant-time verification. Never raises; malformed hashes fail closed."""
     try:
-        algo, it, salt_hex, hash_hex = stored.split("$")
-        assert algo == "pbkdf2"
+        if not isinstance(stored, str):
+            return False
+        parts = stored.split("$")
+        if len(parts) != 4:
+            return False
+        algo, it, salt_hex, hash_hex = parts
+        if algo != "pbkdf2":
+            return False
+        iterations = int(it)
+        if not 10_000 <= iterations <= 10_000_000:
+            return False
         dk = hashlib.pbkdf2_hmac("sha256", password.encode(),
-                                 bytes.fromhex(salt_hex), int(it))
+                                 bytes.fromhex(salt_hex), iterations)
         return hmac.compare_digest(dk.hex(), hash_hex)
     except Exception:
         return False

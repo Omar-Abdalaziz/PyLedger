@@ -66,11 +66,14 @@ class CurrencyConverter(FXProvider):
         return usd_amount * self.exchange_rates[to_currency]
     
     def update_rate(self, currency: str, rate: Decimal):
-        """Update exchange rate for a currency"""
+        """Update exchange rate for a currency (must be > 0)"""
         currency = currency.upper()
         if currency not in self.exchange_rates:
             raise ValueError(f"Currency {currency} not supported")
-        self.exchange_rates[currency] = Decimal(str(rate))
+        rate = Decimal(str(rate))
+        if rate <= 0:
+            raise ValueError(f"Exchange rate must be positive, got {rate}")
+        self.exchange_rates[currency] = rate
     
     def get_symbol(self, currency: str) -> str:
         """Get currency symbol"""

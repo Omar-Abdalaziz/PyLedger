@@ -136,12 +136,11 @@ def report(report_type, period, ledger_file, output_format, output):
                 code=code,
                 currency=acc_data.get('currency', 'USD'),
             )
-            ledger.balance = 0
             ledger.add_account(acc)
             if 'balance' in acc_data:
                 acc.balance = Decimal(str(acc_data['balance']))
     except FileNotFoundError:
-        click.echo("Ledger file not found. Run 'pyliger init' first.", err=True)
+        click.echo("Ledger file not found. Run 'pyledger init' first.", err=True)
         return
 
     from pyledger.reports import IncomeStatement, BalanceSheet, CashFlowStatement, EquityStatement
@@ -161,12 +160,14 @@ def report(report_type, period, ledger_file, output_format, output):
             click.echo(str(r))
             click.echo()
     elif output_format == 'pdf':
+        from pyledger.security.sanitizer import sanitize_filepath
         pdf = PDFEngine(ledger)
         pdf.set_company(name=ledger.name)
         for r in reports:
             pdf.add_report(r)
-        pdf.save(output or 'report.pdf')
-        click.echo(f"PDF saved to {output or 'report.pdf'}")
+        out = sanitize_filepath(output or 'report.pdf')
+        pdf.save(out)
+        click.echo(f"PDF saved to {out}")
 
 
 @cli.command()
@@ -268,12 +269,14 @@ def ratios_export(ledger_file, output, output_format):
 
 
 def _load_ledger(filepath: str):
-    """Load ledger from JSON file"""
+    """Load ledger from JSON file (fails closed with a clean message)"""
     import json
     from pyledger import Ledger, Account
+    from pyledger.security.sanitizer import sanitize_filepath
+    filepath = sanitize_filepath(filepath)
     ledger = Ledger('Temp', 'USD')
     try:
-        with open(filepath) as f:
+        with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
         ledger.name = data.get('name', 'Temp')
         ledger.currency = data.get('currency', 'USD')
@@ -290,22 +293,28 @@ def _load_ledger(filepath: str):
     except FileNotFoundError:
         click.echo(f"Ledger file {filepath} not found.", err=True)
         raise
+    except (ValueError, KeyError, TypeError, json.JSONDecodeError) as e:
+        raise click.ClickException(f"Invalid ledger file {filepath}: {e}")
     return ledger
 
 
 def _parse_period(label: str) -> FinancialPeriod:
     """Parse period label like '2026-07', '2026-Q1', '2026'"""
     from datetime import datetime
-    if label.startswith('YTD'):
-        parts = label.replace('YTD ', '').split('-')
-        return FinancialPeriod.year_to_date(int(parts[0]), int(parts[1]))
-    if 'Q' in label:
-        parts = label.split('Q')
-        return FinancialPeriod.quarterly(int(parts[0]), int(parts[1]))
-    if '-' in label:
-        parts = label.split('-')
-        return FinancialPeriod.monthly(int(parts[0]), int(parts[1]))
-    return FinancialPeriod.annual(int(label))
+    try:
+        if label.startswith('YTD'):
+            parts = label.replace('YTD ', '').split('-')
+            return FinancialPeriod.year_to_date(int(parts[0]), int(parts[1]))
+        if 'Q' in label:
+            parts = label.split('Q')
+            return FinancialPeriod.quarterly(int(parts[0]), int(parts[1]))
+        if '-' in label:
+            parts = label.split('-')
+            return FinancialPeriod.monthly(int(parts[0]), int(parts[1]))
+        return FinancialPeriod.annual(int(label))
+    except (ValueError, IndexError, AttributeError):
+        raise click.BadParameter(
+            f"Invalid period '{label}'. Use '2026-07', '2026-Q1', '2026' or 'YTD 2026-07'")
 
 
 if __name__ == '__main__':

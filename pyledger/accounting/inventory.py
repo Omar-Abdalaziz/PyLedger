@@ -34,7 +34,11 @@ class InventoryItem:
     def receive(self, qty, unit_cost, reference: str = '',
                 date: datetime = None) -> dict:
         qty = Decimal(str(qty))
+        if qty <= 0:
+            raise ValueError(f"Receive quantity must be positive, got {qty}")
         cost = Decimal(str(unit_cost))
+        if cost < 0:
+            raise ValueError(f"Unit cost cannot be negative, got {cost}")
         self.current_qty += qty
         if self.valuation_method == 'fifo':
             self._fifo_layers.append((qty, cost))
@@ -54,6 +58,8 @@ class InventoryItem:
     def issue(self, qty, reference: str = '',
               date: datetime = None) -> dict:
         qty = Decimal(str(qty))
+        if qty <= 0:
+            raise ValueError(f"Issue quantity must be positive, got {qty}")
         if qty > self.current_qty:
             raise ValueError(f"Insufficient stock. Available: {self.current_qty}, Requested: {qty}")
 

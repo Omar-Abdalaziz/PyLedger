@@ -17,6 +17,17 @@ from pyledger.exceptions.errors import (
 )
 
 
+def _sanitize_amount(*args, **kwargs):
+    # Deferred import: pyledger.security.__init__ pulls validator -> ledger
+    # -> account (circular at module load). Resolved lazily at call time.
+    from pyledger.security.sanitizer import sanitize_amount
+    return sanitize_amount(*args, **kwargs)
+from pyledger.exceptions.errors import (
+    InvalidAccountTypeError,
+    InsufficientBalanceError,
+)
+
+
 class Account:
     """
     Represents a general ledger account.
@@ -139,15 +150,18 @@ class Account:
     def deposit(self, amount, description: str = '') -> Decimal:
         """
         Add money to the account
-        
+
         Args:
-            amount: Amount to deposit
+            amount: Amount to deposit (must be >= 0)
             description: Transaction description
-            
+
         Returns:
             New balance
         """
-        amount = format_amount(amount)
+        try:
+            amount = _sanitize_amount(amount, allow_zero=True, allow_negative=False)
+        except ValueError as e:
+            raise ValueError(f"Invalid deposit amount: {e}")
         self.balance += amount
         self.transactions.append({
             'type': 'deposit',
@@ -170,10 +184,14 @@ class Account:
             New balance
             
         Raises:
+            ValueError: If amount is not positive
             InsufficientBalanceError: If balance is insufficient
         """
-        amount = format_amount(amount)
-        
+        try:
+            amount = _sanitize_amount(amount, allow_zero=False, allow_negative=False)
+        except ValueError as e:
+            raise ValueError(f"Invalid withdrawal amount: {e}")
+
         if not self.allow_negative and self.balance < amount:
             raise InsufficientBalanceError(
                 f"Insufficient balance. Available: {self.balance}, Requested: {amount}"

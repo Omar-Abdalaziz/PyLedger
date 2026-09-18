@@ -6,6 +6,10 @@ Role-based access control for accounting operations
 from enum import Enum
 from datetime import datetime
 from typing import Optional, List
+from collections import deque
+
+
+MAX_AUDIT_LOG = 10_000  # bound in-memory audit log (DoS resistance)
 
 
 class Role(Enum):
@@ -100,7 +104,7 @@ class SecurityManager:
     def __init__(self):
         self._users = {}
         self._current_user = None
-        self._audit_log = []
+        self._audit_log = deque(maxlen=MAX_AUDIT_LOG)
 
     def register_user(self, username: str, role: Role = Role.VIEWER,
                       full_name: str = '', email: str = '',

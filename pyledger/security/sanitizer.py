@@ -140,6 +140,16 @@ def sanitize_percentage(pct: Any) -> Decimal:
     return val.quantize(Decimal('0.01'))
 
 
+def normalize_tax_rate(rate: Any) -> Decimal:
+    """Normalize a user-supplied tax rate given as PERCENT to a fraction.
+
+    Accepts 0-100 (e.g. 15 means 15%) and returns e.g. Decimal('0.15').
+    Rejects negatives and rates above 100 to prevent 1500%-style overcharges.
+    """
+    pct = sanitize_percentage(rate)
+    return (pct / Decimal('100')).quantize(Decimal('0.0001'))
+
+
 def sanitize_email(email: str) -> str:
     """Basic email sanitization"""
     email = sanitize_text(email, 254)

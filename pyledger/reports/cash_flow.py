@@ -4,7 +4,7 @@ Supports both indirect (default) and direct methods
 """
 
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
@@ -61,7 +61,7 @@ class CashFlowStatement(BaseReport):
         if not self.period:
             return Decimal('0')
         end_balance = self._filtered_balance(account, as_of_date=self.period.end_date)
-        start_date = self.period.start_date - __import__('datetime').timedelta(days=1)
+        start_date = self.period.start_date - timedelta(days=1)
         start_balance = self._filtered_balance(account, as_of_date=start_date)
         return end_balance - start_balance
 

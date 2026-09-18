@@ -9,6 +9,7 @@ from pyledger.core.journal import JournalEntry
 from pyledger.business.validation import BusinessGuard
 from pyledger.security.sanitizer import (
     sanitize_description, sanitize_amount, sanitize_quantity, sanitize_text,
+    normalize_tax_rate,
 )
 
 
@@ -22,7 +23,7 @@ def record_purchase(ledger, items: list, supplier: str,
                     expense_code: str = '5000',
                     vat_receivable_code: str = '1300',
                     is_inventory: bool = True) -> dict:
-    """Record a purchase from supplier"""
+    """Record a purchase from supplier (tax_rate is PERCENT, e.g. 15 for 15%)"""
     BusinessGuard.require_non_empty_items(items, 'purchase items')
     BusinessGuard.require_valid_customer(supplier)
 
@@ -35,7 +36,10 @@ def record_purchase(ledger, items: list, supplier: str,
             allow_negative=False,
         )
         subtotal += qty * price
-    total_tax = subtotal * Decimal(str(tax_rate)) if tax_rate > 0 else Decimal('0')
+    if tax_rate:
+        total_tax = (subtotal * normalize_tax_rate(tax_rate)).quantize(Decimal('0.01'))
+    else:
+        total_tax = Decimal('0')
     grand_total = subtotal + total_tax
 
     safe_supplier = sanitize_text(supplier)
@@ -76,7 +80,7 @@ def record_expense(ledger, description: str, amount,
                    cash_code: str = '1000',
                    payable_code: str = '2000',
                    vat_receivable_code: str = '1300') -> dict:
-    """Record an operating expense"""
+    """Record an operating expense (tax_rate is PERCENT, e.g. 15 for 15%)"""
     BusinessGuard.require_positive_amount(amount)
 
     expense_account_map = {
@@ -92,7 +96,10 @@ def record_expense(ledger, description: str, amount,
     expense_code = expense_account_map.get(category, '5100')
     date = date or datetime.now()
     amt = sanitize_amount(amount, allow_negative=False)
-    total_tax = (amt * Decimal(str(tax_rate))).quantize(Decimal('0.01')) if tax_rate > 0 else Decimal('0')
+    if tax_rate:
+        total_tax = (amt * normalize_tax_rate(tax_rate)).quantize(Decimal('0.01'))
+    else:
+        total_tax = Decimal('0')
     grand_total = amt + total_tax
 
     entry = JournalEntry(sanitize_description(description), date=date)

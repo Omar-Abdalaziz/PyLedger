@@ -10,6 +10,8 @@ try:
 except ImportError:
     _HAS_ARABIC = False
 
+from xml.sax.saxutils import escape as _xml_escape
+
 
 ARABIC_CHARS = set('ابتثجحخدذرزسشصضطظعغفقكلمنهويىآأإةةپچڤگـ،.؟')
 
@@ -31,7 +33,12 @@ def reshape_arabic(text: str) -> str:
 
 
 def prepare_text(text: str, force_arabic: bool = False) -> str:
-    """Prepare text for PDF rendering (handle Arabic if needed)"""
+    """Prepare text for PDF rendering (handle Arabic if needed).
+
+    Always XML-escapes first: reportlab Paragraph treats <>/& as markup,
+    so unescaped user text would break generation or inject markup.
+    """
+    text = _xml_escape(str(text or ''))
     if force_arabic or contains_arabic(text):
         return reshape_arabic(text)
     return text

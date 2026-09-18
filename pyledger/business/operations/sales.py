@@ -10,6 +10,7 @@ from pyledger.core.account import Account
 from pyledger.business.validation import BusinessGuard, BusinessValidationError
 from pyledger.security.sanitizer import (
     sanitize_description, sanitize_amount, sanitize_quantity, sanitize_text,
+    normalize_tax_rate,
 )
 
 
@@ -31,8 +32,8 @@ def record_sale(ledger, items: list, customer: str,
         items: List of dict with keys: [name, qty, unit_price, (optional) cost]
         customer: Customer name
         payment_method: 'cash', 'credit', or 'mixed'
-        tax_rate: VAT/GST rate (e.g. 0.15 for 15%)
-        
+        tax_rate: VAT/GST rate as PERCENT (e.g. 15 for 15%)
+
     Returns:
         Dict with invoice info and journal entry
     """
@@ -60,9 +61,9 @@ def record_sale(ledger, items: list, customer: str,
             'total': line_total,
         })
 
-    if tax_rate > 0:
-        tax_rate = sanitize_amount(tax_rate, allow_zero=True)
-        total_tax = subtotal * tax_rate
+    if tax_rate:
+        fraction = normalize_tax_rate(tax_rate)
+        total_tax = (subtotal * fraction).quantize(Decimal('0.01'))
 
     grand_total = subtotal + total_tax
     description = sanitize_description(f"Sale to {customer}")
