@@ -4,7 +4,6 @@ Prevent posting entries that exceed budget limits
 """
 
 from decimal import Decimal
-from typing import Optional, List
 from pyledger.accounting.budget import Budget
 from pyledger.core.journal import JournalEntry
 from pyledger.core.ledger import Ledger

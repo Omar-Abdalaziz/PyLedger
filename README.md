@@ -17,10 +17,10 @@ from pyledger import PyLedger
 
 app = PyLedger(company="Acme Corp", currency="USD")
 app.add_investment("Owner", 100_000)
-app.sell([{"name": "Consulting", "quantity": 10, "price": 500}], customer="C-1")
+app.sell([{"name": "Consulting", "quantity": 20, "price": 500}], customer="C-1")
 app.pay_expense("Office rent", 2_000, category="rent")
 
-print(app.balance_sheet().generate()["total_assets"])   # 103000.00
+print(app.balance_sheet().generate()["total_assets"])   # 103500.00
 print(app.income_statement().generate()["net_income"])  # 3000.00
 ```
 

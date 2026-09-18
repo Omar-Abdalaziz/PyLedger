@@ -4,7 +4,6 @@ PyLedger CLI - Command line interface for PyLedger
 
 import click
 import json
-from datetime import datetime
 from decimal import Decimal
 
 from pyledger import BusinessEngine, PDFEngine
@@ -176,7 +175,6 @@ def report(report_type, period, ledger_file, output_format, output):
 @click.option('--output', '-o', default=None)
 def ratios(ledger_file, period, output):
     """Generate financial ratios"""
-    from pyledger import Ledger, Account
     from pyledger.reports.ratios import FinancialRatios
     ledger = _load_ledger(ledger_file)
     fp = _parse_period(period)
@@ -193,7 +191,6 @@ def ratios(ledger_file, period, output):
 @click.option('--vat-rate', default=15.0)
 def vat(ledger_file, period, vat_rate):
     """Generate VAT return"""
-    from pyledger import Ledger, Account
     from pyledger.accounting.tax_reports import VATReturn
     ledger = _load_ledger(ledger_file)
     fp = _parse_period(period)
@@ -207,7 +204,6 @@ def vat(ledger_file, period, vat_rate):
 @click.option('--country', default='US')
 def tax(ledger_file, period, country):
     """Generate corporate tax report"""
-    from pyledger import Ledger, Account
     from pyledger.accounting.tax_reports import CorporateTaxReport
     ledger = _load_ledger(ledger_file)
     fp = _parse_period(period)
@@ -220,7 +216,6 @@ def tax(ledger_file, period, country):
 @click.option('--cash-account', default='1100')
 def reconcile(ledger_file, cash_account):
     """Bank reconciliation report"""
-    from pyledger import Ledger, Account
     from pyledger.accounting.bank_reconciliation import BankReconciliation
     ledger = _load_ledger(ledger_file)
     br = BankReconciliation(ledger, cash_account)
@@ -233,8 +228,6 @@ def reconcile(ledger_file, cash_account):
               type=click.Choice(['receivable', 'payable']))
 def aging(ledger_file, aging_type):
     """Generate aging report"""
-    from pyledger import Ledger, Account
-    from pyledger.accounting.crm import Customer, Supplier
     from pyledger.accounting.aging import ReceivableAging, PayableAging
     ledger = _load_ledger(ledger_file)
     if aging_type == 'receivable':
@@ -251,7 +244,6 @@ def aging(ledger_file, aging_type):
               type=click.Choice(['text', 'csv']))
 def ratios_export(ledger_file, output, output_format):
     """Export financial ratios"""
-    from pyledger import Ledger, Account
     from pyledger.reports.ratios import FinancialRatios
     from pyledger.reports.export import ReportExporter
     ledger = _load_ledger(ledger_file)
@@ -300,7 +292,6 @@ def _load_ledger(filepath: str):
 
 def _parse_period(label: str) -> FinancialPeriod:
     """Parse period label like '2026-07', '2026-Q1', '2026'"""
-    from datetime import datetime
     try:
         if label.startswith('YTD'):
             parts = label.replace('YTD ', '').split('-')

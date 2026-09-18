@@ -2,8 +2,7 @@
 PyLedger PDF Module - Main PDF Engine
 """
 
-from typing import Optional, List, Type
-from datetime import datetime
+from typing import Optional
 from io import BytesIO
 
 from reportlab.lib.pagesizes import A4
@@ -11,17 +10,14 @@ from reportlab.lib.units import mm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, Image, KeepTogether
+    Image
 )
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
 from pyledger.pdf.styles import *
 from pyledger.pdf.branding import CompanyInfo
-from pyledger.pdf.arabic import prepare_text, contains_arabic
-from pyledger.pdf.elements import (
-    make_section_table, make_section_header, make_total_line
-)
+from pyledger.pdf.arabic import prepare_text
 from pyledger.reports.base import BaseReport
 from pyledger.core.ledger import Ledger
 

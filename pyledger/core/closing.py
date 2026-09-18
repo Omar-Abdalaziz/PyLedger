@@ -4,19 +4,16 @@ Period-end closing entries for financial periods
 """
 
 from decimal import Decimal
-from datetime import datetime
-from typing import Optional, List
 from pyledger.core.ledger import Ledger
 from pyledger.core.journal import JournalEntry
 from pyledger.core.account import Account
-from pyledger.core.immutable import AuditTrail, AuditEntry
+from pyledger.core.immutable import AuditTrail
 from pyledger.reports.base import FinancialPeriod
 from pyledger.exceptions.errors import PyLedgerException
 
 
 class PeriodClosedError(PyLedgerException):
     """Raised when trying to post to a closed period"""
-    pass
 
 
 class ClosingEngine:

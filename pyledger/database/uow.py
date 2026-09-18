@@ -12,7 +12,6 @@ Usage:
 """
 
 from contextlib import contextmanager
-from datetime import datetime
 from decimal import Decimal
 
 from pyledger.database.orm import (

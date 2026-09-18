@@ -3,9 +3,7 @@ PyLedger Accounting - Fixed Assets Register
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime, timedelta
-from typing import Optional, List
-from pyledger.core.account import Account
+from datetime import datetime
 from pyledger.core.journal import JournalEntry
 from pyledger.core.ledger import Ledger
 

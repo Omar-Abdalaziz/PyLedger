@@ -3,7 +3,6 @@ PyLedger Reports Module - Statement of Changes in Equity
 """
 
 from decimal import Decimal
-from datetime import datetime
 from typing import Optional
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger

@@ -6,13 +6,11 @@ Represents a journal entry (accounting entry with debits and credits)
 from decimal import Decimal
 from datetime import datetime
 from pyledger.core.transaction import Transaction
-from pyledger.utils.validators import format_amount
 from pyledger.exceptions.errors import UnbalancedEntryError
 
 
 class AlreadyPostedError(UnbalancedEntryError):
     """Raised when attempting to post an already-posted entry."""
-    pass
 
 
 class JournalEntry:

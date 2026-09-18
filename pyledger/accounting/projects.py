@@ -4,10 +4,9 @@ PyLedger Accounting - Project / Departmental Accounting
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
-from pyledger.core.journal import JournalEntry
 
 
 class Project:

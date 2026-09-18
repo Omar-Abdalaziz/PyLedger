@@ -4,11 +4,9 @@ VAT Return & Corporate Tax Report
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime
 from typing import Optional
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
-from pyledger.utils.validators import format_amount
 
 
 class VATReturn(BaseReport):
@@ -39,7 +37,6 @@ class VATReturn(BaseReport):
                     vat_receivable += txn.amount
 
         net_vat_due = vat_payable - vat_receivable
-        vat_rate_pct = self.vat_rate / Decimal('100')
 
         return {
             'title': 'VAT Return',

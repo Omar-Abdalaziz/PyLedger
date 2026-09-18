@@ -5,7 +5,6 @@ Contract management for vendors and customers
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional
 from enum import Enum
 
 

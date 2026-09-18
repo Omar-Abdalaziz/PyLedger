@@ -4,7 +4,7 @@ PyLedger Reports Module - Income Statement (P&L)
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
 

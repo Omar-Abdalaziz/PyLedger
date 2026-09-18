@@ -8,7 +8,6 @@ from datetime import datetime
 from enum import Enum
 from pyledger.utils.validators import format_amount
 from pyledger.accounting.tax import Tax
-from pyledger.exceptions.errors import InvalidInvoiceStatusError
 
 
 def _sanitize_amount(*args, **kwargs):

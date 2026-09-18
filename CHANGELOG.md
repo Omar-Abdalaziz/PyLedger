@@ -52,7 +52,17 @@
 - `depreciation_schedule()` (per-asset) + `DepreciationEngine.generate_schedule()`
   — non-mutating planning tables; `MACRS_TABLES`, `SUPPORTED_METHODS` exported
 - Inventory adds `lifo` (US GAAP; flagged as IAS 2-prohibited)
-- 8 new richness regression tests (232/232 green)- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
+- 8 new richness regression tests (232/232 green)
+
+### 🧹 Quality, scale & docs review (2026-09-18)
+- Lint-clean: autoflake + manual pass, `flake8 F401/F841/F821/E9` zero findings;
+  quoted-annotation names now backed by `TYPE_CHECKING` imports
+- `print()` removed from library code (`SQLiteConnection` uses stdlib logging)
+- `DuplicateDetector` signatures bounded at 50k (FIFO eviction)
+- Backward-compat fix: `record_entry`/`post_entry` tolerate pre-posted entries
+  (legacy post-then-record pattern) — direct double `post()` still raises
+- `example.py` runs green on Windows (UTF-8 stdout) — was crashing on emoji
+- README hero example corrected to verified figures (was stale: 103000/3000)- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
   `Inventory receive/issue`, `FX update_rate` now reject negative (and non-positive
   where meaningless) amounts — negative legs could invert books while "balanced"
 - **Tax convention fix (critical):** `sell/buy/expense tax_rate` is now PERCENT

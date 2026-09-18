@@ -5,12 +5,10 @@ Ensures business operations are valid before execution
 
 from decimal import Decimal
 from datetime import datetime
-from typing import List, Optional
 
 
 class BusinessValidationError(Exception):
     """Raised when a business operation validation fails"""
-    pass
 
 
 class BusinessGuard:

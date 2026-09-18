@@ -4,10 +4,9 @@ PyLedger Business Module - Sales Operations
 
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from pyledger.core.journal import JournalEntry
-from pyledger.core.account import Account
-from pyledger.business.validation import BusinessGuard, BusinessValidationError
+from pyledger.business.validation import BusinessGuard
 from pyledger.security.sanitizer import (
     sanitize_description, sanitize_amount, sanitize_quantity, sanitize_text,
     normalize_tax_rate,

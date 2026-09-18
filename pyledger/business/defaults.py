@@ -3,8 +3,6 @@ PyLedger Business Module - Default Chart of Accounts
 Pre-built chart of accounts for common business types
 """
 
-from decimal import Decimal
-from datetime import datetime
 from pyledger.core.account import Account
 
 

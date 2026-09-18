@@ -4,8 +4,6 @@ PyLedger Accounting - Customer & Supplier Management
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List
-from pyledger.utils.validators import format_amount
 
 
 class Customer:
@@ -76,7 +74,6 @@ class Supplier:
         self.created_date = datetime.now()
 
     def get_balance(self) -> Decimal:
-        from pyledger.accounting.invoice import InvoiceStatus
         total = Decimal('0')
         for inv in self.purchases:
             if inv.status.value not in ('paid', 'cancelled'):

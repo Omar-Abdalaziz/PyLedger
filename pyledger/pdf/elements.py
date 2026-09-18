@@ -2,9 +2,7 @@
 PyLedger PDF Module - Reusable PDF Elements
 """
 
-from decimal import Decimal
-from reportlab.lib.units import mm
-from reportlab.platypus import Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from pyledger.pdf.styles import *
 

@@ -4,7 +4,7 @@ Period-over-period and year-over-year comparisons
 """
 
 from decimal import Decimal
-from typing import Optional, List, Dict
+from typing import Optional, List
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.reports.income_statement import IncomeStatement
 from pyledger.reports.balance_sheet import BalanceSheet

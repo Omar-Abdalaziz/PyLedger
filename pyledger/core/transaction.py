@@ -5,7 +5,6 @@ Represents a single ledger transaction
 
 from decimal import Decimal
 from datetime import datetime
-from pyledger.utils.validators import format_amount
 
 
 def _strict_amount(amount):

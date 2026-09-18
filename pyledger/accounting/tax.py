@@ -5,7 +5,6 @@ Tax calculation and management
 
 from decimal import Decimal
 from pyledger.utils.validators import format_amount, validate_tax_rate
-from pyledger.exceptions.errors import InvalidTaxRateError
 
 
 class Tax:

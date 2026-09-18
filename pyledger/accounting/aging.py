@@ -4,9 +4,9 @@ Accounts Receivable & Accounts Payable Aging
 """
 
 from decimal import Decimal
-from datetime import datetime, timedelta
-from typing import Optional, List, Dict
-from pyledger.reports.base import BaseReport, FinancialPeriod
+from datetime import datetime
+from typing import Optional, List
+from pyledger.reports.base import BaseReport
 from pyledger.core.ledger import Ledger
 from pyledger.accounting.crm import Customer, Supplier
 

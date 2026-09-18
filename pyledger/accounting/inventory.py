@@ -6,8 +6,6 @@ FIFO and Weighted Average Cost valuation
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from collections import deque
-from typing import Optional, List, Dict
-from pyledger.utils.validators import format_amount
 
 
 class InventoryItem:

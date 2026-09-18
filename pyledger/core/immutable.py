@@ -5,7 +5,6 @@ PyLedger Core - Immutable Transaction & Audit Trail
 from decimal import Decimal
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
-from typing import Optional
 import hashlib
 import json
 

@@ -4,7 +4,7 @@ General-purpose notes attached to any entity
 """
 
 from datetime import datetime
-from typing import Optional, List
+from typing import List
 from pyledger.security.sanitizer import sanitize_text
 
 

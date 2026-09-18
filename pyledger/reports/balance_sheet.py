@@ -4,8 +4,8 @@ PyLedger Reports Module - Balance Sheet
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List
-from pyledger.reports.base import BaseReport, FinancialPeriod
+from typing import Optional
+from pyledger.reports.base import BaseReport
 from pyledger.core.ledger import Ledger
 
 

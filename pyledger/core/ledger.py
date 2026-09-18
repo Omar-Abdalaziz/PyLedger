@@ -133,7 +133,8 @@ class Ledger:
             raise ValueError(
                 f"Entry company '{journal_entry.company_id}' != ledger '{self.company_id}'")
         journal_entry.validate()
-        journal_entry.post()
+        if not journal_entry.posted:
+            journal_entry.post()
         self.journal_entries.append(journal_entry)
         self._entries_version += 1
         self._tb_cache = None

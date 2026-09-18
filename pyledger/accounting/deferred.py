@@ -3,11 +3,7 @@ PyLedger Accounting - Deferred Revenue & Prepaid Expenses
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime, timedelta
-from typing import Optional, List
-from pyledger.reports.base import BaseReport, FinancialPeriod
-from pyledger.core.ledger import Ledger
-from pyledger.core.journal import JournalEntry
+from datetime import datetime
 
 
 class _MonthsMixin:

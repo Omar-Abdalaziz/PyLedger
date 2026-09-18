@@ -5,7 +5,7 @@ Supports both indirect (default) and direct methods
 
 from decimal import Decimal
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict
+from typing import Optional, List
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
 
@@ -162,7 +162,6 @@ class CashFlowStatement(BaseReport):
         labels = []
         items = []
 
-        cash_receipts = self._accounts_matching(['cash', 'bank', 'cash_equivalent'], 'asset')
         income_accounts = self.ledger.get_accounts_by_type('income')
 
         collections = Decimal('0')

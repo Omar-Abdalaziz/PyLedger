@@ -4,7 +4,7 @@ PyLedger Business Module - Purchase Operations
 
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from pyledger.core.journal import JournalEntry
 from pyledger.business.validation import BusinessGuard
 from pyledger.security.sanitizer import (

@@ -5,7 +5,7 @@ High-level abstraction for business operations
 
 from decimal import Decimal
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import TYPE_CHECKING
 
 from pyledger.core.ledger import Ledger
 from pyledger.core.account import Account
@@ -20,13 +20,23 @@ from pyledger.reports import (
     EquityStatement, FinancialPeriod,
 )
 from pyledger.security.sanitizer import (
-    sanitize_text, sanitize_name, sanitize_account_code,
-    sanitize_amount, sanitize_description,
+    sanitize_name, sanitize_description,
 )
 from pyledger.security.validator import (
     EntryValidator, DuplicateDetector, BusinessRuleError,
-    validate_new_account, validate_invoice_items, validate_tax_rate,
+    validate_new_account,
 )
+
+if TYPE_CHECKING:  # quoted annotations only; runtime imports stay local (no cycles)
+    from pyledger.reports.ratios import FinancialRatios
+    from pyledger.accounting.tax_reports import VATReturn, CorporateTaxReport
+    from pyledger.accounting.crm import Customer, Supplier
+    from pyledger.accounting.assets import FixedAsset
+    from pyledger.accounting.inventory import InventoryItem
+    from pyledger.accounting.budget import Budget
+    from pyledger.accounting.bank_reconciliation import BankReconciliation
+    from pyledger.accounting.projects import Project
+    from pyledger.accounting.deferred import DeferredRevenue, PrepaidExpense
 
 
 class BusinessEngine:
@@ -83,11 +93,17 @@ class BusinessEngine:
         return self.entry_validator.validate(entry)
 
     def post_entry(self, entry: JournalEntry) -> bool:
-        """Post a journal entry with full security validation"""
+        """Post a journal entry with full security validation.
+
+        Tolerates pre-posted entries (legacy post-then-record pattern):
+        they are validated and recorded, never posted twice.
+        """
         if self.duplicate_detector.check_entry(entry):
             raise BusinessRuleError("Duplicate entry detected")
         self.entry_validator.validate_and_raise(entry)
-        result = entry.post()
+        result = True
+        if not entry.posted:
+            result = entry.post()
         self.duplicate_detector.mark_seen(entry)
         self.ledger.journal_entries.append(entry)
         return result
@@ -217,7 +233,7 @@ class BusinessEngine:
     def create_fixed_asset(self, name: str, cost: float, code: str,
                            useful_life: int,
                            method: str = 'straight_line') -> 'FixedAsset':
-        from pyledger.accounting.assets import FixedAsset, DepreciationMethod
+        from pyledger.accounting.assets import FixedAsset
         return FixedAsset(name, cost, code, useful_life,
                           depreciation_method=method)
 
@@ -260,7 +276,7 @@ class BusinessEngine:
     def to_pdf(self, filepath: str = 'report.pdf',
                reports: list = None):
         """Generate PDF report(s)"""
-        from pyledger.pdf import PDFEngine, CompanyInfo
+        from pyledger.pdf import PDFEngine
         pdf = PDFEngine(self.ledger)
         pdf.set_company(name=self.company_name)
         base_reports = reports or [

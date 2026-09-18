@@ -6,7 +6,7 @@ Abstract base class for all financial reports
 from decimal import Decimal
 from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from pyledger.core.ledger import Ledger
 
 

@@ -4,7 +4,7 @@ Colors, fonts, and styling constants for PDF generation
 """
 
 from reportlab.lib import colors
-from reportlab.lib.units import mm, cm
+from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4
 
 # Page setup

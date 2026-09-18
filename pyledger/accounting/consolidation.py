@@ -4,7 +4,7 @@ Multi-entity consolidation with elimination entries
 """
 
 from decimal import Decimal
-from typing import Optional, List, Dict
+from typing import Optional, List
 from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
 from pyledger.reports.income_statement import IncomeStatement

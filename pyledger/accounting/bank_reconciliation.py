@@ -4,8 +4,6 @@ PyLedger Accounting - Bank Reconciliation
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List
-from pyledger.reports.base import BaseReport, FinancialPeriod
 from pyledger.core.ledger import Ledger
 
 

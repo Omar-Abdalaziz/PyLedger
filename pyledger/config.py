@@ -6,7 +6,6 @@ Library-wide settings with module-level integration
 import os
 import importlib.util
 from decimal import Decimal
-from typing import Optional, Dict, Any
 
 
 def _load_root_config() -> dict:

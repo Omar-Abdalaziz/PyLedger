@@ -4,10 +4,7 @@ PyLedger Reports - CSV / Excel Export for Financial Reports
 
 import csv
 import io
-from decimal import Decimal
-from typing import Optional
-from pyledger.reports.base import BaseReport, FinancialPeriod
-from pyledger.core.ledger import Ledger
+from pyledger.reports.base import BaseReport
 from pyledger.security.sanitizer import sanitize_csv_field
 
 

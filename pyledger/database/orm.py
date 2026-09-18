@@ -18,9 +18,9 @@ from typing import Optional
 try:
     from sqlalchemy import (
         String, Numeric, DateTime, Boolean, Text, ForeignKey,
-        UniqueConstraint, create_engine, select,
+        UniqueConstraint,
     )
-    from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+    from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
     _HAS_SA = True
 except ImportError:  # pragma: no cover - optional dependency
     _HAS_SA = False

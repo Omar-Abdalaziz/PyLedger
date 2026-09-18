@@ -5,7 +5,7 @@ Prevents injection attacks across all text/CSV/HTML inputs
 
 import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from typing import Any, Optional
+from typing import Any
 
 
 # ── Pattern Definitions ──────────────────────────────────────────

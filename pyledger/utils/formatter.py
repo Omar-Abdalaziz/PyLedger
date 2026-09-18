@@ -4,7 +4,6 @@ Text formatting utilities
 """
 
 from decimal import Decimal
-from datetime import datetime
 
 
 class Formatter:

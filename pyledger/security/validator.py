@@ -5,15 +5,13 @@ Enforces business rules, duplicates detection, and security constraints
 
 from decimal import Decimal
 from datetime import datetime, timedelta
-from typing import Optional, List, Set, Tuple
+from typing import Optional, List
 from pyledger.core.ledger import Ledger
 from pyledger.core.journal import JournalEntry
-from pyledger.core.account import Account
 from pyledger.core.closing import ClosingEngine
 from pyledger.security.sanitizer import (
-    sanitize_text, sanitize_account_code, sanitize_amount,
-    sanitize_quantity, sanitize_percentage, sanitize_description,
-    sanitize_name,
+    sanitize_account_code, sanitize_amount, sanitize_quantity,
+    sanitize_percentage, sanitize_name,
 )
 
 
@@ -37,14 +35,26 @@ class SecurityValidationError(ValidationError):
 
 
 class DuplicateDetector:
-    """Detect duplicate transactions, invoices, and entries"""
+    """Detect duplicate transactions, invoices, and entries.
+
+    Signatures are bounded (FIFO eviction past MAX_SIGNATURES) so a
+    long-running service cannot grow memory without limit.
+    """
+
+    MAX_SIGNATURES = 50_000
 
     def __init__(self):
-        self._seen_signatures: Set[str] = set()
+        from collections import OrderedDict
+        self._seen_signatures: OrderedDict = OrderedDict()
         self._window = timedelta(hours=24)
 
     def _signature(self, *args) -> str:
         return '|'.join(str(a) for a in args)
+
+    def _remember(self, sig: str):
+        self._seen_signatures[sig] = None
+        while len(self._seen_signatures) > self.MAX_SIGNATURES:
+            self._seen_signatures.popitem(last=False)
 
     def check_entry(self, entry: JournalEntry) -> bool:
         sig = self._signature(
@@ -62,7 +72,7 @@ class DuplicateDetector:
             str(entry.get_total_credits()),
             entry.date.strftime('%Y-%m-%d %H') if entry.date else '',
         )
-        self._seen_signatures.add(sig)
+        self._remember(sig)
 
     def check_invoice(self, customer: str, items: list,
                       total: Decimal, date: datetime) -> bool:
@@ -82,7 +92,7 @@ class DuplicateDetector:
         )
         sig = self._signature(customer, items_sig, str(total),
                               date.strftime('%Y-%m-%d'))
-        self._seen_signatures.add(sig)
+        self._remember(sig)
 
     def clear(self):
         self._seen_signatures.clear()
@@ -193,12 +203,12 @@ def validate_invoice_items(items: list) -> List[str]:
 
     for i, item in enumerate(items):
         try:
-            qty = sanitize_quantity(item.get('quantity', 0), min_qty=1)
+            sanitize_quantity(item.get('quantity', 0), min_qty=1)
         except ValueError as e:
             errors.append(f"Item {i}: {e}")
 
         try:
-            price = sanitize_amount(item.get('price', 0), allow_negative=False)
+            sanitize_amount(item.get('price', 0), allow_negative=False)
         except ValueError as e:
             errors.append(f"Item {i} price: {e}")
 

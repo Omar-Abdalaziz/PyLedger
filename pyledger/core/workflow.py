@@ -5,7 +5,7 @@ Approval workflows for journal entries
 
 from enum import Enum
 from datetime import datetime
-from typing import Optional, List
+from typing import List
 from decimal import Decimal
 
 

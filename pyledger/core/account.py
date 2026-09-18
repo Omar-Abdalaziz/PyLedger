@@ -5,7 +5,7 @@ Represents a general ledger account
 
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from pyledger.utils.validators import (
     validate_account_code,
     validate_account_type,

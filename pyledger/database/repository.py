@@ -5,7 +5,11 @@ Abstract repository for data persistence
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
+import logging
 from pyledger.database.models import BaseModel
+
+
+logger = logging.getLogger('pyledger.database')
 
 
 class Repository(ABC):
@@ -14,27 +18,22 @@ class Repository(ABC):
     @abstractmethod
     def create(self, model: BaseModel) -> BaseModel:
         """Create a new record"""
-        pass
     
     @abstractmethod
     def read(self, id: int) -> Optional[BaseModel]:
         """Read a record by ID"""
-        pass
     
     @abstractmethod
     def update(self, model: BaseModel) -> BaseModel:
         """Update a record"""
-        pass
     
     @abstractmethod
     def delete(self, id: int) -> bool:
         """Delete a record"""
-        pass
     
     @abstractmethod
     def get_all(self) -> List[BaseModel]:
         """Get all records"""
-        pass
 
 
 class InMemoryRepository(Repository):
@@ -109,7 +108,7 @@ class SQLiteConnection(DatabaseConnection):
             self.is_connected = True
             return True
         except Exception as e:
-            print(f"Connection error: {e}")
+            logger.error("Connection error: %s", e)
             return False
     
     def disconnect(self) -> bool:
@@ -198,4 +197,4 @@ class SQLiteConnection(DatabaseConnection):
             try:
                 self.execute(query)
             except Exception as e:
-                print(f"Table creation error: {e}")
+                logger.error("Table creation error: %s", e)
