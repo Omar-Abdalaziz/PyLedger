@@ -11,7 +11,11 @@ from pyledger.utils.validators import format_amount
 
 
 class InventoryItem:
-    """Represents a single inventory item with stock tracking"""
+    """Represents a single inventory item with stock tracking.
+
+    valuation_method: 'fifo' (IFRS + GAAP), 'weighted_average' (IFRS + GAAP),
+        or 'lifo' (US GAAP only — prohibited under IAS 2).
+    """
 
     def __init__(self, sku: str, name: str, category: str = 'general',
                  selling_price: Decimal = Decimal('0'),
@@ -40,7 +44,7 @@ class InventoryItem:
         if cost < 0:
             raise ValueError(f"Unit cost cannot be negative, got {cost}")
         self.current_qty += qty
-        if self.valuation_method == 'fifo':
+        if self.valuation_method in ('fifo', 'lifo'):
             self._fifo_layers.append((qty, cost))
         self._total_cost += qty * cost
 
@@ -78,6 +82,18 @@ class InventoryItem:
                     self._fifo_layers[0] = (layer_qty - remaining, layer_cost)
                     remaining = Decimal('0')
 
+        elif self.valuation_method == 'lifo':
+            while remaining > 0 and self._fifo_layers:
+                layer_qty, layer_cost = self._fifo_layers[-1]
+                if layer_qty <= remaining:
+                    cost += layer_qty * layer_cost
+                    remaining -= layer_qty
+                    self._fifo_layers.pop()
+                else:
+                    cost += remaining * layer_cost
+                    self._fifo_layers[-1] = (layer_qty - remaining, layer_cost)
+                    remaining = Decimal('0')
+
         elif self.valuation_method == 'weighted_average':
             avg_cost = self.weighted_average_cost()
             cost = qty * avg_cost
@@ -109,7 +125,7 @@ class InventoryItem:
 
     @property
     def inventory_value(self) -> Decimal:
-        if self.valuation_method == 'fifo':
+        if self.valuation_method in ('fifo', 'lifo'):
             return sum(q * c for q, c in self._fifo_layers)
         return self._total_cost
 

@@ -454,6 +454,11 @@ box.get_payments_by_method("cash")
 
 ### 6.13 Accounting — Fixed Assets & Depreciation
 
+All globally used methods (IAS 16 / GAAP / US tax): `straight_line` · `declining_balance`
+(with `rate_factor`: `2.0` = 200%/double, `1.5` = 150%) · `sum_of_years` ·
+`units_of_production` (IAS 16.62) · `macrs` (IRS Pub. 946: `GDS-3/5/7/10/15/20`,
+`GDS-27.5/39` realty mid-month). Plus `convention='half_year'` and full schedules.
+
 ```python
 from pyledger.accounting.assets import FixedAsset, DepreciationEngine, DepreciationMethod
 m = FixedAsset("CNC Machine", 100000, "FA-001", useful_life_years=5,
@@ -461,8 +466,22 @@ m = FixedAsset("CNC Machine", 100000, "FA-001", useful_life_years=5,
 m.annual_depreciation()    # 20000.00
 m.monthly_depreciation(); m.to_dict(); m.dispose(30000)
 
+db150 = FixedAsset("Van", 100000, "FA-002", 5, DepreciationMethod.DECLINING_BALANCE,
+                   rate_factor=1.5)
+db150.annual_depreciation()   # 30000.00
+
+truck = FixedAsset("Truck", 50000, "FA-003", 5, DepreciationMethod.UNITS_OF_PRODUCTION,
+                   total_estimated_units=100000)
+truck.record_production(20000)   # 10000.00, tracked in lifetime_produced
+
+us_box = FixedAsset("Server", 10000, "FA-004", 0, DepreciationMethod.MACRS, macrs_class="GDS-5")
+us_box.depreciation_schedule()   # 6 IRS rows summing to cost
+bldg = FixedAsset("Office", 275000, "FA-005", 0, DepreciationMethod.MACRS,
+                  macrs_class="GDS-27.5", placed_in_service_month=1)
+
 eng = DepreciationEngine(ledger)
 eng.register_asset(m); eng.get_asset("CNC Machine"); eng.get_all_assets()
+eng.generate_schedule("CNC Machine")   # non-mutating planning table
 eng.post_depreciation("CNC Machine")   # Dr Depreciation / Cr Accum. Depr.
 eng.post_all_depreciation()
 eng.dispose_asset("CNC Machine", disposal_price=30000)  # gain/loss computed
@@ -472,7 +491,7 @@ eng.dispose_asset("CNC Machine", disposal_price=30000)  # gain/loss computed
 
 ```python
 from pyledger.accounting.inventory import InventoryItem, InventoryManager
-it = InventoryItem("SKU-1", "Widget", valuation_method="fifo")  # or 'weighted_average'
+it = InventoryItem("SKU-1", "Widget", valuation_method="fifo")  # or 'weighted_average', or 'lifo' (US GAAP only — banned by IAS 2)
 it.receive(10, 100); it.receive(10, 200)
 it.weighted_average_cost()   # 150.00
 it.issue(3)                  # FIFO layers consumed; raises on insufficient stock

@@ -41,7 +41,18 @@
 - **Inventory:** `_total_cost` maintained for FIFO issues too (WAC consistency)
 - **Aging:** no-due-date invoices counted in 0-30 bucket (were dropped)
 - **Rounding:** HALF_UP on all posting-path quantization (tax/VAT standard)
-- New `test_accounting_correctness.py`: 10 regression tests (224/224 green)- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
+- New `test_accounting_correctness.py`: 10 regression tests (224/224 green)
+
+### 📚 Richness: full global depreciation + LIFO (2026-09-18)
+- `FixedAsset` now supports every globally used method: `straight_line`
+  (+`half_year` convention), `declining_balance` with `rate_factor`
+  (200%/150%/any), `sum_of_years`, `units_of_production` (IAS 16.62,
+  with `record_production` capping), `macrs` (IRS GDS-3/5/7/10/15/20 tables
+  + GDS-27.5/39 realty mid-month)
+- `depreciation_schedule()` (per-asset) + `DepreciationEngine.generate_schedule()`
+  — non-mutating planning tables; `MACRS_TABLES`, `SUPPORTED_METHODS` exported
+- Inventory adds `lifo` (US GAAP; flagged as IAS 2-prohibited)
+- 8 new richness regression tests (232/232 green)- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
   `Inventory receive/issue`, `FX update_rate` now reject negative (and non-positive
   where meaningless) amounts — negative legs could invert books while "balanced"
 - **Tax convention fix (critical):** `sell/buy/expense tax_rate` is now PERCENT

@@ -5,7 +5,7 @@ PyLedger Accounting Module __init__
 from pyledger.accounting.tax import Tax, TaxCalculator
 from pyledger.accounting.invoice import Invoice, InvoiceItem, InvoiceStatus
 from pyledger.accounting.payment import Payment, PaymentMethod, PaymentStatus, PaymentReceiver
-from pyledger.accounting.assets import FixedAsset, DepreciationMethod, DepreciationEngine
+from pyledger.accounting.assets import FixedAsset, DepreciationMethod, DepreciationEngine, MACRS_TABLES, SUPPORTED_METHODS
 from pyledger.accounting.inventory import InventoryItem, InventoryManager
 from pyledger.accounting.crm import Customer, Supplier
 from pyledger.accounting.aging import ReceivableAging, PayableAging
@@ -30,6 +30,8 @@ __all__ = [
     'FixedAsset',
     'DepreciationMethod',
     'DepreciationEngine',
+    'MACRS_TABLES',
+    'SUPPORTED_METHODS',
     'InventoryItem',
     'InventoryManager',
     'Customer',

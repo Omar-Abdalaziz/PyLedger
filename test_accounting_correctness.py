@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pyledger import Ledger, Account, JournalEntry, Invoice, Tax
 from pyledger.reports import FinancialPeriod, IncomeStatement
+from pyledger.accounting.assets import FixedAsset, DepreciationMethod, DepreciationEngine
 from pyledger.accounting.bank_reconciliation import BankReconciliation
 from pyledger.accounting.inventory import InventoryItem
 from pyledger.accounting.aging import ReceivableAging
@@ -109,3 +110,64 @@ class TestSections:
 
     def test_half_up_rounding(self):
         assert format_amount(Decimal('0.025')) == Decimal('0.03')
+
+
+class TestDepreciationRichness:
+    def test_declining_balance_factor(self):
+        a = FixedAsset('M', 100000, 'FA', 5, DepreciationMethod.DECLINING_BALANCE,
+                       rate_factor=1.5)
+        assert a.annual_depreciation() == Decimal('30000.00')
+        d = FixedAsset('M2', 100000, 'FB', 5, DepreciationMethod.DECLINING_BALANCE)
+        assert d.annual_depreciation() == Decimal('40000.00')
+
+    def test_straight_line_half_year_convention(self):
+        b = FixedAsset('B', 100000, 'FC', 5, convention='half_year')
+        assert b.annual_depreciation(year=0) == Decimal('10000.00')
+        assert b.annual_depreciation(year=2) == Decimal('20000.00')
+        assert b.annual_depreciation(year=4) == Decimal('10000.00')
+
+    def test_units_of_production(self):
+        c = FixedAsset('T', 50000, 'FD', 5, DepreciationMethod.UNITS_OF_PRODUCTION,
+                       total_estimated_units=100000)
+        assert c.record_production(20000) == Decimal('10000.00')
+        assert c.lifetime_produced == Decimal('20000')
+        # Schedule covers remaining units only (20000 already claimed)
+        sched = c.depreciation_schedule(units_per_year=[20000] * 5)
+        assert sum((r['depreciation'] for r in sched), Decimal('0')) == Decimal('40000.00')
+        fresh = FixedAsset('T2', 50000, 'FD2', 5, DepreciationMethod.UNITS_OF_PRODUCTION,
+                           total_estimated_units=100000)
+        full = fresh.depreciation_schedule(units_per_year=[20000] * 5)
+        assert sum((r['depreciation'] for r in full), Decimal('0')) == Decimal('50000.00')
+
+    def test_units_of_production_requires_estimate(self):
+        import pytest
+        with pytest.raises(ValueError):
+            FixedAsset('T', 50000, 'FD', 5, DepreciationMethod.UNITS_OF_PRODUCTION)
+
+    def test_macrs_5year_sums_to_cost(self):
+        d = FixedAsset('S', 10000, 'FE', 0, DepreciationMethod.MACRS, macrs_class='GDS-5')
+        sched = d.depreciation_schedule()
+        assert len(sched) == 6
+        assert sum((r['depreciation'] for r in sched), Decimal('0')) == Decimal('10000.00')
+
+    def test_macrs_realty_mid_month(self):
+        e = FixedAsset('Bld', 275000, 'FF', 0, DepreciationMethod.MACRS,
+                       macrs_class='GDS-27.5', placed_in_service_month=1)
+        assert e.macrs_annual(0) == Decimal('9583.33')
+
+    def test_schedule_terminates_at_residual(self):
+        f = FixedAsset('X', 100000, 'FG', 5, residual_value=10000)
+        rows = f.depreciation_schedule()
+        assert rows[-1]['book_value'] == Decimal('10000.00')
+
+    def test_engine_schedule_and_lifo(self):
+        l = Ledger()
+        eng = DepreciationEngine(l)
+        eng.register_asset(FixedAsset('S', 10000, 'FH', 0, DepreciationMethod.MACRS,
+                                      macrs_class='GDS-5'))
+        assert len(eng.generate_schedule('S')) == 6
+        it = InventoryItem('SKU', 'W', valuation_method='lifo')
+        it.receive(10, 100)
+        it.receive(10, 200)
+        assert it.issue(5)['total_cost'] == Decimal('1000')
+        assert it.inventory_value == Decimal('2000')
