@@ -4,7 +4,7 @@ Prevents injection attacks across all text/CSV/HTML inputs
 """
 
 import re
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Any, Optional
 
 
@@ -113,7 +113,7 @@ def sanitize_amount(amount: Any, allow_zero: bool = True,
     if val.as_tuple().exponent < -4:
         raise ValueError(f"Amount has too many decimal places: {val}")
 
-    return val.quantize(Decimal('0.01'))
+    return val.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
 def sanitize_quantity(qty: Any, min_qty: int = 0, max_qty: int = 1_000_000) -> Decimal:

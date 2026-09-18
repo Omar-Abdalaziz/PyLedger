@@ -54,11 +54,19 @@ class BankReconciliation:
     def get_statement_balance(self) -> Decimal:
         return sum(t.amount for t in self.bank_statement_lines)
 
+    def _signed(self, txn: dict) -> Decimal:
+        try:
+            acc = self.ledger.get_account(self.cash_account_code)
+            return acc.balance_effect(txn.get('type', 'deposit'), txn.get('amount', 0))
+        except Exception:
+            amt = Decimal(str(txn.get('amount', 0)))
+            return -amt if txn.get('type') in ('withdrawal', 'credit') else amt
+
     def get_deposits_in_transit(self) -> list:
         ledger_txns = self._get_cash_transactions()
         deposits = []
         for txn in ledger_txns:
-            if txn.get('amount', 0) > 0 and not self._is_cleared(txn):
+            if self._signed(txn) > 0 and not self._is_cleared(txn):
                 deposits.append(txn)
         return deposits
 
@@ -66,7 +74,7 @@ class BankReconciliation:
         ledger_txns = self._get_cash_transactions()
         checks = []
         for txn in ledger_txns:
-            if txn.get('amount', 0) < 0 and not self._is_cleared(txn):
+            if self._signed(txn) < 0 and not self._is_cleared(txn):
                 checks.append(txn)
         return checks
 
@@ -78,8 +86,11 @@ class BankReconciliation:
             return []
 
     def _is_cleared(self, txn: dict) -> bool:
-        ref = str(txn.get('description', ''))
-        return any(ref in st.reference for st in self._cleared)
+        ref = str(txn.get('description', '') or '')
+        if not ref:
+            return False
+        return any(st.reference and (ref in st.reference or st.reference in ref)
+                   for st in self._cleared)
 
     def mark_cleared(self, reference: str) -> 'BankReconciliation':
         self._cleared.append(BankTransaction(datetime.now(), '', Decimal('0'), reference))

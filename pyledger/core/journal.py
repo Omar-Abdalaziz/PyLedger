@@ -158,12 +158,16 @@ class JournalEntry:
         # Post using proper double-entry semantics via Account helpers.
         # GL accounts never block posting (normal-balance rules); cash-level
         # overdraft control belongs to CashAccount / BusinessEngine validators.
+        # Legs are stamped with the ENTRY date (not wall-clock time) so that
+        # period cut-off (IFRS/GAAP) works on replayed history.
         for transaction in self.debits:
-            transaction.account.apply_debit(transaction.amount, self.description)
+            transaction.account.apply_debit(transaction.amount, self.description,
+                                            date=transaction.date or self.date)
             transaction.posted = True
 
         for transaction in self.credits:
-            transaction.account.apply_credit(transaction.amount, self.description)
+            transaction.account.apply_credit(transaction.amount, self.description,
+                                             date=transaction.date or self.date)
             transaction.posted = True
         
         self.posted = True

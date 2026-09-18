@@ -42,11 +42,11 @@ class FixedAsset:
 
     @property
     def net_book_value(self) -> Decimal:
-        return (self.cost - self.accumulated_depreciation).quantize(Decimal('0.01'))
+        return (self.cost - self.accumulated_depreciation).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     @property
     def depreciable_amount(self) -> Decimal:
-        return (self.cost - self.residual_value).quantize(Decimal('0.01'))
+        return (self.cost - self.residual_value).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def _days_in_year(self, year: int) -> int:
         from calendar import isleap
@@ -57,12 +57,12 @@ class FixedAsset:
             return Decimal('0')
 
         if self.depreciation_method == DepreciationMethod.STRAIGHT_LINE:
-            return (self.depreciable_amount / Decimal(str(self.useful_life))).quantize(Decimal('0.01'))
+            return (self.depreciable_amount / Decimal(str(self.useful_life))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         elif self.depreciation_method == DepreciationMethod.DECLINING_BALANCE:
             rate = Decimal('2') / Decimal(str(self.useful_life))
             nbv = self.net_book_value
-            depr = (nbv * rate).quantize(Decimal('0.01'))
+            depr = (nbv * rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             if (nbv - depr) < self.residual_value:
                 depr = nbv - self.residual_value
             return max(depr, Decimal('0'))
@@ -72,7 +72,7 @@ class FixedAsset:
             if remaining <= 0:
                 return Decimal('0')
             syd_sum = self.useful_life * (self.useful_life + 1) // 2
-            return (self.depreciable_amount * Decimal(str(remaining)) / Decimal(str(syd_sum))).quantize(Decimal('0.01'))
+            return (self.depreciable_amount * Decimal(str(remaining)) / Decimal(str(syd_sum))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         return Decimal('0')
 
@@ -82,7 +82,7 @@ class FixedAsset:
         days_in_year = self._days_in_year(year)
         annual = self.annual_depreciation(year=0)
         day_frac = Decimal(str(self._days_in_month(date))) / Decimal(str(days_in_year))
-        return (annual * day_frac).quantize(Decimal('0.01'))
+        return (annual * day_frac).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     @staticmethod
     def _days_in_month(dt: datetime) -> int:

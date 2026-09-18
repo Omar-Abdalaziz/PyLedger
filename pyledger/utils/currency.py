@@ -2,7 +2,7 @@
 PyLedger Utilities Module - Currency Management
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from pyledger.utils.validators import SUPPORTED_CURRENCIES
 
 
@@ -169,7 +169,7 @@ class Money:
         """Round to currency decimals (KWD/BHD/OMR use 3, others 2)."""
         places = 3 if self.currency in ('KWD', 'BHD', 'OMR', 'JOD') else 2
         q = Decimal(10) ** -places
-        return Money(self.amount.quantize(q), self.currency)
+        return Money(self.amount.quantize(q, rounding=ROUND_HALF_UP), self.currency)
 
     def allocate(self, ratios) -> list:
         """Split money by ratios without losing cents (enterprise split)."""
@@ -182,7 +182,8 @@ class Money:
             if i == len(ratios) - 1:
                 results.append(Money(self.amount - allocated, self.currency))
             else:
-                share = (self.amount * Decimal(str(r)) / Decimal(str(total_ratio))).quantize(q)
+                share = (self.amount * Decimal(str(r)) / Decimal(str(total_ratio))).quantize(
+                    q, rounding=ROUND_HALF_UP)
                 allocated += share
                 results.append(Money(share, self.currency))
         return results

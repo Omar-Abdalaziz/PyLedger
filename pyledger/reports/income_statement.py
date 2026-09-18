@@ -64,7 +64,10 @@ class IncomeStatement(BaseReport):
             txn_time = txn.get('timestamp') if isinstance(txn, dict) else txn.get('timestamp')
             if txn_time and self.period.start_date <= txn_time <= self.period.end_date:
                 amount = txn.get('amount') if isinstance(txn, dict) else txn.amount
-                total += Decimal(str(amount))
+                ttype = txn.get('type') if isinstance(txn, dict) else txn.type
+                # Signed replay: sales returns (debit legs on revenue) reduce
+                # revenue per IFRS 15 (net presentation).
+                total += account.balance_effect(ttype, Decimal(str(amount)))
         return total
 
     def _format_text(self) -> str:

@@ -5,7 +5,7 @@ Data validation functions for accounting operations
 
 import re
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from pyledger.exceptions.errors import InvalidCurrencyError, InvalidTaxRateError
 
 
@@ -89,8 +89,13 @@ def validate_date(date_obj) -> bool:
 
 
 def format_amount(amount, decimals: int = 2) -> Decimal:
-    """Convert and format amount to Decimal"""
+    """Convert and format amount to Decimal.
+
+    Uses ROUND_HALF_UP (the accounting/tax standard: 2.5% of 1.00 is 0.03,
+    not 0.02 as banker's rounding would give).
+    """
     try:
-        return Decimal(str(amount)).quantize(Decimal(10) ** -decimals)
+        return Decimal(str(amount)).quantize(Decimal(10) ** -decimals,
+                                             rounding=ROUND_HALF_UP)
     except:
         raise ValueError(f"Invalid amount: {amount}")

@@ -47,7 +47,10 @@ class ReceivableAging(BaseReport):
                     continue
                 due = inv.due_date
                 if not due:
+                    # No due date: current bucket AND counted (previously
+                    # dropped from customer_total entirely).
                     bracket_totals['0-30 Days'] += remaining
+                    customer_total += remaining
                     continue
                 days_overdue = (as_of - due).days
                 if days_overdue <= 0:
@@ -141,19 +144,8 @@ class PayableAging(BaseReport):
                 due = inv.due_date
                 if not due:
                     bracket_totals['0-30 Days'] += remaining
+                    supplier_total += remaining
                     continue
-                days_overdue = (as_of - due).days
-                if days_overdue <= 0:
-                    bracket_totals['0-30 Days'] += remaining
-                elif days_overdue <= 30:
-                    bracket_totals['0-30 Days'] += remaining
-                elif days_overdue <= 60:
-                    bracket_totals['31-60 Days'] += remaining
-                elif days_overdue <= 90:
-                    bracket_totals['61-90 Days'] += remaining
-                else:
-                    bracket_totals['90+ Days'] += remaining
-                supplier_total += remaining
 
             if supplier_total > 0:
                 supplier_details.append({

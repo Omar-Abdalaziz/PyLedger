@@ -28,7 +28,20 @@
 - Added `NOTICE` attribution file: distributors must retain the PyLedger credit line
 
 ### 🛡️ Security hardening (audit 2026-09-18, bandit: 0 medium/high)
-- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
+
+### 🧾 Accounting correctness audit (IFRS/GAAP, 2026-09-18)
+- **Period cut-off fixed:** legs are stamped with the ENTRY date (was wall-clock),
+  so period income/cash-flow/as-of balances work; added `Account.balance_effect()`
+  (signed replay by normal side) used by `get_balance(as_of)`, income and cash-flow
+  filters — sales returns now net revenue (IFRS 15), liability as-of fixed
+- **Multi-tax invoices:** `add_tax` accumulates on subtotal + `taxes` breakdown
+  in `to_dict()` (was overwriting)
+- **Bank reconciliation:** deposits/outstanding derived from signed effects
+  (was sign-blind: always 0 outstanding); bidirectional clear matching
+- **Inventory:** `_total_cost` maintained for FIFO issues too (WAC consistency)
+- **Aging:** no-due-date invoices counted in 0-30 bucket (were dropped)
+- **Rounding:** HALF_UP on all posting-path quantization (tax/VAT standard)
+- New `test_accounting_correctness.py`: 10 regression tests (224/224 green)- **Money-sign guards:** `Transaction`, `deposit/withdraw`, `InvoiceItem/pay`, `Payment`,
   `Inventory receive/issue`, `FX update_rate` now reject negative (and non-positive
   where meaningless) amounts — negative legs could invert books while "balanced"
 - **Tax convention fix (critical):** `sell/buy/expense tax_rate` is now PERCENT

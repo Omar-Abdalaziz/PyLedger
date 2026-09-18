@@ -117,6 +117,7 @@ class Invoice:
         self.date = date or datetime.now()
         self.currency = currency
         self.items = []
+        self.taxes = []
         self.status = InvoiceStatus.DRAFT
         self.subtotal = Decimal('0')
         self.tax_total = Decimal('0')
@@ -158,16 +159,15 @@ class Invoice:
         self.total = format_amount(self.subtotal + self.tax_total)
     
     def add_tax(self, tax: Tax) -> 'Invoice':
+        """Add a tax to the invoice.
+
+        Multiple taxes ACCUMULATE on the subtotal (non-compound), matching
+        the documented multi-tax support. Previously each call replaced
+        the previous tax.
         """
-        Add tax to invoice
-        
-        Args:
-            tax: Tax object
-            
-        Returns:
-            Self for method chaining
-        """
-        self.tax_total = tax.calculate(self.subtotal)
+        self.taxes.append(tax)
+        self.tax_total = format_amount(
+            sum((t.calculate(self.subtotal) for t in self.taxes), Decimal('0')))
         self._recalculate()
         return self
 
@@ -254,6 +254,8 @@ class Invoice:
             'date': self.date.isoformat(),
             'currency': self.currency,
             'items': [item.to_dict() for item in self.items],
+            'taxes': [{'name': t.name, 'rate': str(t.rate),
+                       'amount': str(t.calculate(self.subtotal))} for t in self.taxes],
             'subtotal': str(self.subtotal),
             'tax_total': str(self.tax_total),
             'total': str(self.total),

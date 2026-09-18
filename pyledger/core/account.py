@@ -113,7 +113,20 @@ class Account:
     def is_credit_normal(self) -> bool:
         return self.normal_balance == 'credit'
 
-    def apply_debit(self, amount, description: str = '') -> Decimal:
+    def balance_effect(self, txn_type: str, amount) -> Decimal:
+        """Signed P&L/balance-sheet effect of one history leg.
+
+        A leg moves the balance UP iff its side equals the account's
+        normal side (deposit counts as debit, withdrawal as credit).
+        This is the single rule behind as-of balances and period reports
+        (IFRS/GAAP cut-off): replaying unsigned amounts misstates
+        credit-normal accounts and contra entries (e.g. sales returns).
+        """
+        amount = format_amount(amount)
+        side = 'debit' if str(txn_type).lower() in ('deposit', 'debit') else 'credit'
+        return amount if side == self.normal_balance else -amount
+
+    def apply_debit(self, amount, description: str = '', date: datetime = None) -> Decimal:
         """Apply debit per double-entry rules (always succeeds for GL)."""
         amount = format_amount(amount)
         if self.is_debit_normal():
@@ -125,12 +138,12 @@ class Account:
             'type': 'debit',
             'amount': amount,
             'description': description,
-            'timestamp': datetime.now(),
+            'timestamp': date or datetime.now(),
             'balance_after': self.balance
         })
         return self.balance
 
-    def apply_credit(self, amount, description: str = '') -> Decimal:
+    def apply_credit(self, amount, description: str = '', date: datetime = None) -> Decimal:
         """Apply credit per double-entry rules (always succeeds for GL)."""
         amount = format_amount(amount)
         if self.is_credit_normal():
@@ -142,7 +155,7 @@ class Account:
             'type': 'credit',
             'amount': amount,
             'description': description,
-            'timestamp': datetime.now(),
+            'timestamp': date or datetime.now(),
             'balance_after': self.balance
         })
         return self.balance
@@ -208,16 +221,17 @@ class Account:
         return self.balance
     
     def get_balance(self, as_of_date: Optional[datetime] = None) -> Decimal:
-        """Get account balance, optionally as of a specific date"""
+        """Get account balance, optionally as of a specific date.
+
+        As-of replay respects normal balances: a credit leg raises a
+        liability/income/equity account and lowers an asset/expense one.
+        """
         if as_of_date is None:
             return self.balance
         total = Decimal('0')
         for txn in self.transactions:
             if txn['timestamp'] <= as_of_date:
-                if txn['type'] in ('deposit', 'debit'):
-                    total += txn['amount']
-                else:
-                    total -= txn['amount']
+                total += self.balance_effect(txn.get('type', ''), txn['amount'])
         return format_amount(total)
 
     def get_balance_as_of(self, as_of_date: datetime) -> Decimal:

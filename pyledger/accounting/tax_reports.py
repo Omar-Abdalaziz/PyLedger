@@ -3,7 +3,7 @@ PyLedger Accounting - Tax Reports
 VAT Return & Corporate Tax Report
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from typing import Optional
 from pyledger.reports.base import BaseReport, FinancialPeriod
@@ -102,8 +102,8 @@ class CorporateTaxReport(BaseReport):
                 total_expenses += acc.get_balance()
 
         net_profit_before_tax = total_income - total_expenses
-        estimated_tax = (net_profit_before_tax * self.tax_rate / Decimal('100')).quantize(Decimal('0.01'))
-        net_profit_after_tax = (net_profit_before_tax - estimated_tax).quantize(Decimal('0.01'))
+        estimated_tax = (net_profit_before_tax * self.tax_rate / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        net_profit_after_tax = (net_profit_before_tax - estimated_tax).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         return {
             'title': 'Corporate Tax Report',

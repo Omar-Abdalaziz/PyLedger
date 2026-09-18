@@ -3,7 +3,7 @@ PyLedger Accounting - Inventory System
 FIFO and Weighted Average Cost valuation
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from collections import deque
 from typing import Optional, List, Dict
@@ -83,11 +83,11 @@ class InventoryItem:
             cost = qty * avg_cost
 
         self.current_qty -= qty
+        # Always maintain total cost so weighted-average stays consistent
+        # even for FIFO items (FIFO valuation itself still uses layers).
+        self._total_cost -= cost
 
-        if self.valuation_method == 'weighted_average':
-            self._total_cost -= cost
-
-        unit_cost = (cost / qty).quantize(Decimal('0.01')) if qty > 0 else Decimal('0')
+        unit_cost = (cost / qty).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if qty > 0 else Decimal('0')
 
         movement = {
             'type': 'out',
@@ -105,7 +105,7 @@ class InventoryItem:
         """Weighted average unit cost (method API required by test suite)."""
         if self.current_qty == 0:
             return Decimal('0')
-        return (self._total_cost / self.current_qty).quantize(Decimal('0.01'))
+        return (self._total_cost / self.current_qty).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     @property
     def inventory_value(self) -> Decimal:

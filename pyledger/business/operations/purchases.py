@@ -2,7 +2,7 @@
 PyLedger Business Module - Purchase Operations
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from typing import List, Optional
 from pyledger.core.journal import JournalEntry
@@ -37,7 +37,8 @@ def record_purchase(ledger, items: list, supplier: str,
         )
         subtotal += qty * price
     if tax_rate:
-        total_tax = (subtotal * normalize_tax_rate(tax_rate)).quantize(Decimal('0.01'))
+        total_tax = (subtotal * normalize_tax_rate(tax_rate)).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP)
     else:
         total_tax = Decimal('0')
     grand_total = subtotal + total_tax
@@ -97,7 +98,8 @@ def record_expense(ledger, description: str, amount,
     date = date or datetime.now()
     amt = sanitize_amount(amount, allow_negative=False)
     if tax_rate:
-        total_tax = (amt * normalize_tax_rate(tax_rate)).quantize(Decimal('0.01'))
+        total_tax = (amt * normalize_tax_rate(tax_rate)).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP)
     else:
         total_tax = Decimal('0')
     grand_total = amt + total_tax

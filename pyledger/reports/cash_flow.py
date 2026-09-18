@@ -49,7 +49,8 @@ class CashFlowStatement(BaseReport):
             txn_time = txn.get('timestamp') if isinstance(txn, dict) else None
             if txn_time and txn_time <= cutoff:
                 amount = txn.get('amount') if isinstance(txn, dict) else txn.amount
-                total += Decimal(str(amount))
+                ttype = txn.get('type') if isinstance(txn, dict) else txn.type
+                total += account.balance_effect(ttype, Decimal(str(amount)))
         return total
 
     def _accounts_matching(self, keywords: List[str], type_filter: str = None) -> list:

@@ -2,7 +2,7 @@
 PyLedger Business Module - Sales Operations
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from typing import List, Optional
 from pyledger.core.journal import JournalEntry
@@ -63,7 +63,8 @@ def record_sale(ledger, items: list, customer: str,
 
     if tax_rate:
         fraction = normalize_tax_rate(tax_rate)
-        total_tax = (subtotal * fraction).quantize(Decimal('0.01'))
+        total_tax = (subtotal * fraction).quantize(Decimal('0.01'),
+                                                     rounding=ROUND_HALF_UP)
 
     grand_total = subtotal + total_tax
     description = sanitize_description(f"Sale to {customer}")

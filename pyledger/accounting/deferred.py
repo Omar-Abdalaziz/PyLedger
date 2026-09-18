@@ -2,7 +2,7 @@
 PyLedger Accounting - Deferred Revenue & Prepaid Expenses
 """
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timedelta
 from typing import Optional, List
 from pyledger.reports.base import BaseReport, FinancialPeriod
@@ -56,7 +56,7 @@ class DeferredRevenue(_MonthsMixin):
         return self._diff_months(self.recognition_start, self.recognition_end)
 
     def get_monthly_amount(self) -> Decimal:
-        return (self.total_amount / Decimal(str(self.get_months()))).quantize(Decimal('0.01'))
+        return (self.total_amount / Decimal(str(self.get_months()))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def generate_schedule(self) -> list:
         self.schedule = []
@@ -132,7 +132,7 @@ class PrepaidExpense(_MonthsMixin):
         return self._diff_months(self.amortization_start, self.amortization_end)
 
     def get_monthly_amount(self) -> Decimal:
-        return (self.total_amount / Decimal(str(self.get_months()))).quantize(Decimal('0.01'))
+        return (self.total_amount / Decimal(str(self.get_months()))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def generate_schedule(self) -> list:
         monthly = self.get_monthly_amount()
